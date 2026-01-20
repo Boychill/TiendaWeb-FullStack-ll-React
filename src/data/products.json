@@ -1,0 +1,125 @@
+[
+    {
+        "id": "1",
+        "name": "Smartphone Pro Max",
+        "slug": "smartphone-pro-max",
+        "price": 999990,
+        "description": "High-end smartphone with advanced camera and fast processor.",
+        "category": "technology",
+        "images": [
+            "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&q=80&w=600"
+        ],
+        "stock": 50,
+        "featured": true,
+        "variants": {
+            "color": "Black",
+            "storage": "256GB"
+        }
+    },
+    {
+        "id": "2",
+        "name": "Laptop UltraSlim 15",
+        "slug": "laptop-ultraslim-15",
+        "price": 1250000,
+        "description": "Powerful laptop for professionals and creatives.",
+        "category": "technology",
+        "images": [
+            "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&q=80&w=600"
+        ],
+        "stock": 20,
+        "featured": true,
+        "variants": {
+            "color": "Silver",
+            "ram": "16GB"
+        }
+    },
+    {
+        "id": "3",
+        "name": "Wireless Noise Cancelling Headphones",
+        "slug": "wireless-headphones",
+        "price": 250000,
+        "description": "Immersive sound with active noise cancellation.",
+        "category": "technology",
+        "images": [
+            "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=600"
+        ],
+        "stock": 100,
+        "variants": {
+            "color": "Black"
+        }
+    },
+    {
+        "id": "4",
+        "name": "Men's Cotton T-Shirt",
+        "slug": "mens-cotton-tshirt",
+        "price": 15000,
+        "description": "Premium cotton t-shirt, comfortable and breathable.",
+        "category": "clothing",
+        "images": [
+            "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=600"
+        ],
+        "stock": 200,
+        "variants": {
+            "color": "White",
+            "size": "L"
+        }
+    },
+    {
+        "id": "5",
+        "name": "Denim Jacket",
+        "slug": "denim-jacket",
+        "price": 45000,
+        "description": "Classic denim jacket for everyday style.",
+        "category": "clothing",
+        "images": [
+            "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&q=80&w=600"
+        ],
+        "stock": 80,
+        "featured": true,
+        "variants": {
+            "size": "M"
+        }
+    },
+    {
+        "id": "6",
+        "name": "Professional Drill Set",
+        "slug": "professional-drill-set",
+        "price": 89000,
+        "description": "Complete drill set with various bits and accessories.",
+        "category": "tools",
+        "images": [
+            "https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&q=80&w=600"
+        ],
+        "stock": 30,
+        "variants": {
+            "power": "18V"
+        }
+    },
+    {
+        "id": "7",
+        "name": "Garden Shovel",
+        "slug": "garden-shovel",
+        "price": 12000,
+        "description": "Durable shovel for all your gardening needs.",
+        "category": "tools",
+        "images": [
+            "https://images.unsplash.com/photo-1416879115533-1963fa81d773?auto=format&fit=crop&q=80&w=600"
+        ],
+        "stock": 150
+    },
+    {
+        "id": "8",
+        "name": "Mechanical Gaming Keyboard",
+        "slug": "mechanical-gaming-keyboard",
+        "price": 85000,
+        "description": "RGB mechanical keyboard with blue switches.",
+        "category": "technology",
+        "images": [
+            "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&q=80&w=600"
+        ],
+        "stock": 60,
+        "variants": {
+            "switch": "Blue"
+        }
+    }
+]
