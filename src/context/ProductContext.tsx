@@ -8,6 +8,9 @@ const initialProducts = initialProductsData as Product[];
 interface ProductContextType {
     products: Product[];
     filterByCategory: (category: string) => void;
+    addProduct: (product: Product) => void;
+    updateProduct: (product: Product) => void;
+    deleteProduct: (id: string) => void;
     getProductById: (id: string) => Product | undefined;
     filteredProducts: Product[];
 }
@@ -19,7 +22,6 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
 
     useEffect(() => {
-        // Load products from JSON (simulate API)
         const storedProducts = localStorage.getItem('products');
         if (storedProducts) {
             try {
@@ -38,6 +40,12 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }
     }, []);
 
+    const saveProducts = (newProducts: Product[]) => {
+        setProducts(newProducts);
+        setFilteredProducts(newProducts); // Reset filter to show all or handle filter re-apply if needed
+        localStorage.setItem('products', JSON.stringify(newProducts));
+    };
+
     const filterByCategory = (category: string) => {
         if (category === 'all') {
             setFilteredProducts(products);
@@ -50,8 +58,31 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
         return products.find(p => p.id === id);
     };
 
+    const addProduct = (product: Product) => {
+        const newProducts = [...products, product];
+        saveProducts(newProducts);
+    };
+
+    const updateProduct = (updatedProduct: Product) => {
+        const newProducts = products.map(p => p.id === updatedProduct.id ? updatedProduct : p);
+        saveProducts(newProducts);
+    };
+
+    const deleteProduct = (id: string) => {
+        const newProducts = products.filter(p => p.id !== id);
+        saveProducts(newProducts);
+    };
+
     return (
-        <ProductContext.Provider value={{ products, filterByCategory, getProductById, filteredProducts }}>
+        <ProductContext.Provider value={{
+            products,
+            filteredProducts,
+            filterByCategory,
+            getProductById,
+            addProduct,
+            updateProduct,
+            deleteProduct
+        }}>
             {children}
         </ProductContext.Provider>
     );

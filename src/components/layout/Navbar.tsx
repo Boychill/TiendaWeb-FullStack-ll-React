@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingCart, User as UserIcon, LogOut, Menu, X, Search } from 'lucide-react';
+import { ShoppingCart, User as UserIcon, LogOut, Menu, X, Search, Shield, LayoutDashboard, Package, ShoppingBag } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 
 const Navbar = () => {
-    const { user, logout, isAuthenticated } = useAuth();
+    const { user, logout, isAuthenticated, isAdmin } = useAuth();
     const { itemCount } = useCart();
     const navigate = useNavigate();
     const location = useLocation();
@@ -80,16 +80,6 @@ const Navbar = () => {
 
                         <div className="h-6 w-px bg-gray-200"></div>
 
-                        {/* Cart link - Keeping /cart if distinct page or modal. We haven't built /cart page but Requirements imply Checkout is the flow. 
-                           However usually there is a Cart Review page. 
-                           I'll assume /cart -> /checkout step 3 or let's just make it go to /checkout directly for MVP 
-                           OR keep existing Cart page if it was good. 
-                           The existing Cart.tsx was 7KB, likely good.
-                           But I'll point to /checkout for now as "Proceso de Compra" 
-                           Actually, standard is /cart view then checkout.
-                           I'll check if I should keep /cart. User has Cart.tsx.
-                           I'll leave /cart link as is for now, but update auth links.
-                        */}
                         <Link to="/checkout" className="relative group p-2 rounded-full hover:bg-gray-100 transition-colors">
                             <ShoppingCart className="h-6 w-6 text-gray-600 group-hover:text-primary-600 transition-colors" />
                             {itemCount > 0 && (
@@ -101,6 +91,35 @@ const Navbar = () => {
 
                         {isAuthenticated ? (
                             <div className="relative flex items-center space-x-4">
+
+                                {isAdmin && (
+                                    <div className="relative group">
+                                        <button className="flex items-center space-x-1 py-2 px-3 rounded-full hover:bg-gray-100 text-primary-700 font-medium transition-colors">
+                                            <Shield size={18} />
+                                            <span>Admin</span>
+                                        </button>
+
+                                        {/* Dropdown */}
+                                        <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform origin-top-right z-50">
+                                            <div className="px-4 py-2 border-b border-gray-50 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                                Administración
+                                            </div>
+                                            <Link to="/admin/dashboard" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600">
+                                                <LayoutDashboard size={16} className="mr-2" />
+                                                Dashboard
+                                            </Link>
+                                            <Link to="/admin/products" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600">
+                                                <Package size={16} className="mr-2" />
+                                                Productos
+                                            </Link>
+                                            <Link to="/admin/orders" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600">
+                                                <ShoppingBag size={16} className="mr-2" />
+                                                Pedidos
+                                            </Link>
+                                        </div>
+                                    </div>
+                                )}
+
                                 <Link
                                     to="/auth/account"
                                     className="flex items-center space-x-2 py-2 px-3 rounded-full hover:bg-gray-100 transition-colors"
@@ -179,6 +198,21 @@ const Navbar = () => {
                             )}
                             {isAuthenticated && (
                                 <>
+                                    {isAdmin && (
+                                        <div className="mb-4 bg-primary-50 rounded-xl p-3">
+                                            <p className="text-xs font-bold text-primary-600 uppercase tracking-wider mb-2">Administración</p>
+                                            <Link to="/admin/dashboard" className="flex items-center px-2 py-2 text-sm text-gray-700 hover:bg-white rounded-lg">
+                                                <LayoutDashboard size={16} className="mr-2" /> Dashboard
+                                            </Link>
+                                            <Link to="/admin/products" className="flex items-center px-2 py-2 text-sm text-gray-700 hover:bg-white rounded-lg">
+                                                <Package size={16} className="mr-2" /> Productos
+                                            </Link>
+                                            <Link to="/admin/orders" className="flex items-center px-2 py-2 text-sm text-gray-700 hover:bg-white rounded-lg">
+                                                <ShoppingBag size={16} className="mr-2" /> Pedidos
+                                            </Link>
+                                        </div>
+                                    )}
+
                                     <Link to="/auth/account" className="flex items-center space-x-3 px-3 py-3 rounded-lg hover:bg-gray-50 text-gray-700">
                                         <UserIcon className="h-5 w-5 text-gray-400" />
                                         <span>Mi Perfil ({user?.name})</span>

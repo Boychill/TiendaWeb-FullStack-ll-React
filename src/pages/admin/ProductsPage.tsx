@@ -4,17 +4,40 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Badge } from '../../components/ui/Badge';
 import { Edit, Trash2, Plus, Search } from 'lucide-react';
+import { ProductFormModal } from '../../components/admin/ProductFormModal';
+import { Product } from '../../types/product';
 
 export function ProductsPage() {
-    const { products } = useProducts();
+    const { products, deleteProduct, addProduct, updateProduct } = useProducts();
     const [search, setSearch] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
     const filtered = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
 
-    // Delete handlers would go here, interacting with Context (needs update to support deletion)
-    // For now purely visual/read-only as context only has read from JSON/LocalStorage initial load
-    // Need to implement deleteProduct in Context if requested, but plan implies "CRUD list"
-    // I'll skip implementation of Delete logic unless I update Context.
+    const handleDelete = (id: string) => {
+        if (confirm('¿Estás seguro de eliminar este producto?')) {
+            deleteProduct(id);
+        }
+    };
+
+    const handleEdit = (product: Product) => {
+        setEditingProduct(product);
+        setIsModalOpen(true);
+    };
+
+    const handleCreate = () => {
+        setEditingProduct(null);
+        setIsModalOpen(true);
+    };
+
+    const handleSubmit = (product: Product) => {
+        if (editingProduct) {
+            updateProduct(product);
+        } else {
+            addProduct(product);
+        }
+    };
 
     return (
         <div className="space-y-6">
@@ -23,7 +46,7 @@ export function ProductsPage() {
                     <h1 className="text-2xl font-bold text-gray-900">Productos</h1>
                     <p className="text-gray-500">Gestiona tu catálogo.</p>
                 </div>
-                <Button>
+                <Button onClick={handleCreate}>
                     <Plus size={18} className="mr-2" /> Nuevo Producto
                 </Button>
             </div>
@@ -70,10 +93,16 @@ export function ProductsPage() {
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex justify-end gap-2">
-                                            <button className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors">
+                                            <button
+                                                onClick={() => handleEdit(product)}
+                                                className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors"
+                                            >
                                                 <Edit size={16} />
                                             </button>
-                                            <button className="p-2 hover:bg-red-50 text-red-500 rounded-lg transition-colors">
+                                            <button
+                                                onClick={() => handleDelete(product.id)}
+                                                className="p-2 hover:bg-red-50 text-red-500 rounded-lg transition-colors"
+                                            >
                                                 <Trash2 size={16} />
                                             </button>
                                         </div>
@@ -84,6 +113,14 @@ export function ProductsPage() {
                     </table>
                 </div>
             </div>
+
+            <ProductFormModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSubmit={handleSubmit}
+                initialData={editingProduct}
+            />
         </div>
     );
 }
+
