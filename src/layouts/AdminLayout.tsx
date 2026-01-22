@@ -1,8 +1,9 @@
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useEffect } from 'react';
-import { LayoutDashboard, Package, ShoppingBag, LogOut, Store } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingBag, LogOut, Store, Home } from 'lucide-react';
 import { Button } from '../components/ui/Button';
+import { BackButton } from '../components/ui/BackButton';
 
 export function AdminLayout() {
     const { user, isAdmin, logout } = useAuth();
@@ -24,7 +25,8 @@ export function AdminLayout() {
     ];
 
     return (
-        <div className="min-h-screen bg-gray-100 flex">
+        <div className="min-h-screen bg-gray-100 flex relative">
+            <BackButton className="right-8 left-auto top-6" />
             {/* Sidebar */}
             <aside className="w-64 bg-gray-900 text-white flex-shrink-0 flex flex-col">
                 <div className="p-6 border-b border-gray-800">
@@ -51,6 +53,13 @@ export function AdminLayout() {
                 </nav>
 
                 <div className="p-4 border-t border-gray-800">
+                    <Link
+                        to="/"
+                        className="flex items-center gap-3 px-4 py-3 mb-2 text-gray-400 hover:bg-gray-800 hover:text-white rounded-xl transition-colors"
+                    >
+                        <Home size={20} />
+                        <span className="font-medium">Volver a la Tienda</span>
+                    </Link>
                     <div className="flex items-center gap-3 px-4 py-3 mb-4">
                         <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-sm font-bold">
                             {user?.name.charAt(0)}

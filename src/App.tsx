@@ -24,6 +24,7 @@ import { ProductsPage } from './pages/admin/ProductsPage';
 import { OrdersPage } from './pages/admin/OrdersPage';
 
 import ProtectedRoute from './components/routes/ProtectedRoute';
+import GuestRoute from './components/routes/GuestRoute';
 import { AuthProvider } from './context/AuthContext';
 import { ProductProvider } from './context/ProductContext';
 import { CartProvider } from './context/CartContext';
@@ -41,9 +42,11 @@ function App() {
                                 <Route path="shop" element={<ShopPage />} />
                                 <Route path="product/:id" element={<ProductDetailPage />} />
 
-                                {/* Auth */}
-                                <Route path="auth/login" element={<LoginPage />} />
-                                <Route path="auth/register" element={<RegisterPage />} />
+                                {/* Guest Routes (Only for not logged in users) */}
+                                <Route element={<GuestRoute />}>
+                                    <Route path="auth/login" element={<LoginPage />} />
+                                    <Route path="auth/register" element={<RegisterPage />} />
+                                </Route>
 
                                 <Route element={<ProtectedRoute />}>
                                     <Route path="auth/account" element={<AccountPage />} />

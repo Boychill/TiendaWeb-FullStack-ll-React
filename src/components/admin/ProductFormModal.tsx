@@ -44,6 +44,11 @@ export function ProductFormModal({ isOpen, onClose, onSubmit, initialData }: Pro
         // Basic validation
         if (!formData.name || !formData.price || !formData.category) return;
 
+        if (Number(formData.price) < 0 || Number(formData.stock) < 0) {
+            alert("El precio y el stock no pueden ser negativos");
+            return;
+        }
+
         const productSubmission = {
             id: initialData?.id || crypto.randomUUID(),
             name: formData.name,
@@ -88,6 +93,7 @@ export function ProductFormModal({ isOpen, onClose, onSubmit, initialData }: Pro
                             <label className="block text-sm font-medium text-gray-700 mb-1">Precio (CLP)</label>
                             <Input
                                 type="number"
+                                min={0}
                                 value={formData.price}
                                 onChange={e => setFormData({ ...formData, price: Number(e.target.value) })}
                                 placeholder="9990"
@@ -98,6 +104,7 @@ export function ProductFormModal({ isOpen, onClose, onSubmit, initialData }: Pro
                             <label className="block text-sm font-medium text-gray-700 mb-1">Stock</label>
                             <Input
                                 type="number"
+                                min={0}
                                 value={formData.stock}
                                 onChange={e => setFormData({ ...formData, stock: Number(e.target.value) })}
                                 placeholder="10"

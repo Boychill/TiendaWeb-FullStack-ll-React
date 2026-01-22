@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { BackButton } from '../../components/ui/BackButton';
 
 export function LoginPage() {
     const navigate = useNavigate();
@@ -35,7 +36,8 @@ export function LoginPage() {
     };
 
     return (
-        <div className="min-h-[80vh] flex items-center justify-center bg-gray-50 px-4">
+        <div className="min-h-[80vh] flex items-center justify-center bg-gray-50 px-4 relative">
+            <BackButton />
             <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
                 <div className="text-center mb-8">
                     <h1 className="text-3xl font-bold text-gray-900">Bienvenido de nuevo</h1>
