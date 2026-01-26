@@ -5,6 +5,7 @@ interface CartContextType {
     cart: CartItem[];
     addToCart: (product: Product, quantity: number, options?: Record<string, string>) => boolean;
     removeFromCart: (productId: string, options?: { size?: string; color?: string }) => void;
+    updateQuantity: (productId: string, delta: number, options?: Record<string, string>) => void;
     clearCart: () => void;
     total: number;
     subtotal: number;
@@ -113,6 +114,42 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }));
     };
 
+    const updateQuantity = (productId: string, delta: number, options?: Record<string, string>) => {
+        setCart(prev => {
+            return prev.map(item => {
+                if (item.id !== productId) return item;
+
+                // Check variants
+                const itemVariants = item.variants || {};
+                const targetVariants = options || {};
+                const itemKeys = Object.keys(itemVariants);
+                const targetKeys = Object.keys(targetVariants);
+
+                if (itemKeys.length !== targetKeys.length) return item;
+                const match = itemKeys.every(key => itemVariants[key] === targetVariants[key]);
+
+                if (!match) return item;
+
+                const newQuantity = item.quantity + delta;
+                if (newQuantity <= 0) return null;
+
+                // Check Stock for increment
+                if (delta > 0) {
+                    let maxStock = item.stock;
+                    if (item.combinations) {
+                        const variant = item.combinations.find(c =>
+                            Object.entries(c.values).every(([k, v]) => itemVariants[k] === v)
+                        );
+                        if (variant) maxStock = variant.stock;
+                    }
+                    if (newQuantity > maxStock) return item;
+                }
+
+                return { ...item, quantity: newQuantity };
+            }).filter((item): item is CartItem => item !== null);
+        });
+    };
+
     const clearCart = () => setCart([]);
 
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -126,7 +163,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
     return (
-        <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, total, subtotal, shippingCost, itemCount }}>
+        <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart, total, subtotal, shippingCost, itemCount }}>
             {children}
         </CartContext.Provider>
     );

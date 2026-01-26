@@ -11,7 +11,7 @@ interface ProductContextType {
     addProduct: (product: Product) => void;
     updateProduct: (product: Product) => void;
     deleteProduct: (id: string) => void;
-    updateProductStock: (items: { id: string; quantity: number }[]) => void;
+    updateProductStock: (items: { id: string; quantity: number; variants?: Record<string, string> }[]) => void;
     getProductById: (id: string) => Product | undefined;
     filteredProducts: Product[];
 }
@@ -84,11 +84,26 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
         saveProducts(newProducts);
     };
 
-    const updateProductStock = (items: { id: string; quantity: number }[]) => {
+    const updateProductStock = (items: { id: string; quantity: number; variants?: Record<string, string> }[]) => {
         const newProducts = products.map(p => {
             const item = items.find(i => i.id === p.id);
             if (item) {
-                return { ...p, stock: Math.max(0, p.stock - item.quantity) };
+                let updatedProduct = { ...p };
+
+                // If item has variants, try to update specific combination stock
+                if (item.variants && p.combinations) {
+                    updatedProduct.combinations = p.combinations.map(combo => {
+                        const isMatch = Object.entries(combo.values).every(([k, v]) => item.variants?.[k] === v);
+                        if (isMatch) {
+                            return { ...combo, stock: Math.max(0, combo.stock - item.quantity) };
+                        }
+                        return combo;
+                    });
+                }
+
+                // Always update global stock
+                updatedProduct.stock = Math.max(0, p.stock - item.quantity);
+                return updatedProduct;
             }
             return p;
         });

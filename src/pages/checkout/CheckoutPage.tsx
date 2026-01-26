@@ -8,7 +8,7 @@ import { Input } from '../../components/ui/Input';
 import { CheckCircle, CreditCard, MapPin, Truck } from 'lucide-react';
 
 export function CheckoutPage() {
-    const { cart, total, subtotal, shippingCost, clearCart } = useCart();
+    const { cart, total, subtotal, shippingCost, clearCart, updateQuantity, removeFromCart } = useCart();
     const { updateProductStock } = useProducts();
     const { user } = useAuth();
     const navigate = useNavigate();
@@ -20,6 +20,18 @@ export function CheckoutPage() {
         zip: '',
         country: 'Chile'
     });
+
+    // Validation State
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const validateStep1 = () => {
+        const newErrors: Record<string, string> = {};
+        if (!address.street.trim()) newErrors.street = "La dirección es requerida";
+        if (!address.city.trim()) newErrors.city = "La ciudad es requerida";
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     // Redirect if empty cart (unless placing order)
     if (cart.length === 0 && step !== 4) { // Step 4 could be success state inside component or separate page
@@ -51,7 +63,11 @@ export function CheckoutPage() {
         localStorage.setItem('orders', JSON.stringify([...existingOrders, newOrder]));
 
         // Deduct stock
-        updateProductStock(cart.map(item => ({ id: item.id, quantity: item.quantity })));
+        updateProductStock(cart.map(item => ({
+            id: item.id,
+            quantity: item.quantity,
+            variants: item.variants
+        })));
 
         clearCart();
         // Show success state
@@ -65,20 +81,30 @@ export function CheckoutPage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2 md:col-span-2">
-                    <label className="text-sm font-medium">Calle y Número</label>
+                    <label className="text-sm font-medium">Calle y Número <span className="text-red-500">*</span></label>
                     <Input
                         value={address.street}
-                        onChange={e => setAddress({ ...address, street: e.target.value })}
+                        onChange={e => {
+                            setAddress({ ...address, street: e.target.value });
+                            if (errors.street) setErrors({ ...errors, street: '' });
+                        }}
                         placeholder="Av. Providencia 1234, Depto 501"
+                        className={errors.street ? "border-red-500 ring-red-100 focus-visible:ring-red-200" : ""}
                     />
+                    {errors.street && <p className="text-xs text-red-500">{errors.street}</p>}
                 </div>
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">Comuna / Ciudad</label>
+                    <label className="text-sm font-medium">Comuna / Ciudad <span className="text-red-500">*</span></label>
                     <Input
                         value={address.city}
-                        onChange={e => setAddress({ ...address, city: e.target.value })}
+                        onChange={e => {
+                            setAddress({ ...address, city: e.target.value });
+                            if (errors.city) setErrors({ ...errors, city: '' });
+                        }}
                         placeholder="Providencia"
+                        className={errors.city ? "border-red-500 ring-red-100 focus-visible:ring-red-200" : ""}
                     />
+                    {errors.city && <p className="text-xs text-red-500">{errors.city}</p>}
                 </div>
                 <div className="space-y-2">
                     <label className="text-sm font-medium">Código Postal (Opcional)</label>
@@ -90,7 +116,11 @@ export function CheckoutPage() {
                 </div>
             </div>
             <div className="flex justify-end pt-4">
-                <Button onClick={() => setStep(2)} disabled={!address.street || !address.city}>
+                <Button
+                    onClick={() => {
+                        if (validateStep1()) setStep(2);
+                    }}
+                >
                     Continuar a Pago
                 </Button>
             </div>
@@ -203,18 +233,45 @@ export function CheckoutPage() {
                 {/* Order Summary Sidebar */}
                 <div className="lg:col-span-1 h-fit bg-gray-50 p-6 rounded-2xl border border-gray-200 sticky top-4">
                     <h3 className="font-bold text-lg mb-4">Resumen de Compra</h3>
-                    <div className="space-y-3 mb-6 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="space-y-4 mb-6 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
                         {cart.map((item) => (
-                            <div key={`${item.id}-${item.variants?.color}-${item.variants?.size}`} className="flex gap-3">
-                                <img src={item.images[0]} alt={item.name} className="w-16 h-16 rounded-md object-cover bg-white" />
+                            <div key={`${item.id}-${Object.values(item.variants || {}).join('-')}`} className="flex gap-3 items-start group">
+                                <img src={item.images[0]} alt={item.name} className="w-16 h-16 rounded-md object-cover bg-white flex-shrink-0" />
                                 <div className="flex-1 min-w-0">
                                     <p className="font-medium text-sm truncate">{item.name}</p>
-                                    <p className="text-xs text-gray-500">
-                                        Qty: {item.quantity}
-                                        {item.variants?.size && ` | Talla: ${item.variants.size}`}
+                                    <p className="text-xs text-gray-500 mb-2">
+                                        {Object.entries(item.variants || {}).map(([k, v]) => `${k}: ${v}`).join(' | ')}
                                     </p>
+
+                                    {/* Interactive Quantity */}
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex items-center border border-gray-200 rounded-md bg-white">
+                                            <button
+                                                className="px-2 py-0.5 hover:bg-gray-50 text-gray-600"
+                                                onClick={() => updateQuantity(item.id, -1, item.variants)}
+                                            >
+                                                -
+                                            </button>
+                                            <span className="text-xs px-1 font-medium min-w-[1.5rem] text-center">{item.quantity}</span>
+                                            <button
+                                                className="px-2 py-0.5 hover:bg-gray-50 text-gray-600"
+                                                onClick={() => updateQuantity(item.id, 1, item.variants)}
+                                            >
+                                                +
+                                            </button>
+                                        </div>
+                                        <button
+                                            className="text-gray-400 hover:text-red-500 p-1"
+                                            onClick={() => removeFromCart(item.id, item.variants)}
+                                            title="Eliminar"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
                                 </div>
-                                <p className="font-medium text-sm">${(item.price * item.quantity).toLocaleString('es-CL')}</p>
+                                <div className="text-right">
+                                    <p className="font-medium text-sm">${(item.price * item.quantity).toLocaleString('es-CL')}</p>
+                                </div>
                             </div>
                         ))}
                     </div>
