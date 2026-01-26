@@ -19,6 +19,7 @@ export interface Product {
     stock: number;
     rating: number;
     reviews: number;
+    featured?: boolean;
     attributes?: {
         name: string;
         options: string[];

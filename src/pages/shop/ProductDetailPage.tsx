@@ -9,7 +9,7 @@ import { ArrowLeft, Minus, Plus, ShoppingCart, Truck, ShieldCheck } from 'lucide
 export function ProductDetailPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { getProductById, products } = useProducts();
+    const { getProductById } = useProducts();
     const { addToCart } = useCart();
 
     // Check if ID is defined before using it

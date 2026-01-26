@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Eye } from 'lucide-react';
-import { Product } from '../../types/product';
+import { Product } from '../../types';
 import { Button } from './Button';
 import { Badge } from './Badge';
 import { useCart } from '../../context/CartContext';
