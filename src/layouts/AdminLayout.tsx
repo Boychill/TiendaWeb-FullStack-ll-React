@@ -26,7 +26,7 @@ export function AdminLayout() {
 
     return (
         <div className="min-h-screen bg-gray-100 flex relative">
-            <BackButton className="right-8 left-auto top-6" />
+
             {/* Sidebar */}
             <aside className="w-64 bg-gray-900 text-white flex-shrink-0 flex flex-col">
                 <div className="p-6 border-b border-gray-800">

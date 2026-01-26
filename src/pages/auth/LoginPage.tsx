@@ -16,9 +16,35 @@ export function LoginPage() {
         password: ''
     });
 
+    const [formErrors, setFormErrors] = useState({ email: '', password: '' });
+
+    const validate = () => {
+        let valid = true;
+        const errors = { email: '', password: '' };
+
+        if (!formData.email) {
+            errors.email = 'El email es obligatorio';
+            valid = false;
+        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+            errors.email = 'Ingresa un email válido';
+            valid = false;
+        }
+
+        if (!formData.password) {
+            errors.password = 'La contraseña es obligatoria';
+            valid = false;
+        }
+
+        setFormErrors(errors);
+        return valid;
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+
+        if (!validate()) return;
+
         setLoading(true);
 
         try {
@@ -45,8 +71,8 @@ export function LoginPage() {
                 </div>
 
                 {error && (
-                    <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-6 text-center border border-red-100">
-                        {error}
+                    <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-6 text-center border border-red-100 flex items-center justify-center gap-2">
+                        <span className="font-bold">Error:</span> {error}
                     </div>
                 )}
 
@@ -54,22 +80,34 @@ export function LoginPage() {
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">Email</label>
                         <Input
-                            type="email"
+                            type="text"
                             value={formData.email}
-                            onChange={e => setFormData({ ...formData, email: e.target.value })}
-                            required
+                            onChange={e => {
+                                setFormData({ ...formData, email: e.target.value });
+                                if (formErrors.email) setFormErrors({ ...formErrors, email: '' });
+                            }}
                             placeholder="tu@email.com"
+                            className={formErrors.email ? 'border-red-500 focus:ring-red-200' : ''}
                         />
+                        {formErrors.email && (
+                            <p className="text-xs text-red-500 mt-1">{formErrors.email}</p>
+                        )}
                     </div>
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-700">Contraseña</label>
                         <Input
                             type="password"
                             value={formData.password}
-                            onChange={e => setFormData({ ...formData, password: e.target.value })}
-                            required
+                            onChange={e => {
+                                setFormData({ ...formData, password: e.target.value });
+                                if (formErrors.password) setFormErrors({ ...formErrors, password: '' });
+                            }}
                             placeholder="••••••••"
+                            className={formErrors.password ? 'border-red-500 focus:ring-red-200' : ''}
                         />
+                        {formErrors.password && (
+                            <p className="text-xs text-red-500 mt-1">{formErrors.password}</p>
+                        )}
                     </div>
 
                     <Button className="w-full text-base h-12" disabled={loading}>

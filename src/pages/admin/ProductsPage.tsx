@@ -1,14 +1,16 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useProducts } from '../../context/ProductContext';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Badge } from '../../components/ui/Badge';
-import { Edit, Trash2, Plus, Search } from 'lucide-react';
+import { Edit, Trash2, Plus, Search, ArrowLeft } from 'lucide-react';
 import { ProductFormModal } from '../../components/admin/ProductFormModal';
-import { Product } from '../../types/product';
+import { Product } from '../../types';
 
 export function ProductsPage() {
     const { products, deleteProduct, addProduct, updateProduct } = useProducts();
+    const navigate = useNavigate();
     const [search, setSearch] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -46,9 +48,12 @@ export function ProductsPage() {
                     <h1 className="text-2xl font-bold text-gray-900">Productos</h1>
                     <p className="text-gray-500">Gestiona tu catálogo.</p>
                 </div>
-                <Button onClick={handleCreate}>
-                    <Plus size={18} className="mr-2" /> Nuevo Producto
-                </Button>
+                <div className="flex gap-3">
+
+                    <Button onClick={handleCreate}>
+                        <Plus size={18} className="mr-2" /> Nuevo Producto
+                    </Button>
+                </div>
             </div>
 
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">

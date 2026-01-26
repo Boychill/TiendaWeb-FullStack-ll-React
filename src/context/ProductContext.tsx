@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Product } from '../types/product';
+import { Product } from '../types';
 import initialProductsData from '../data/products.json';
 
 // Ensure data matches Type
@@ -11,6 +11,7 @@ interface ProductContextType {
     addProduct: (product: Product) => void;
     updateProduct: (product: Product) => void;
     deleteProduct: (id: string) => void;
+    updateProductStock: (items: { id: string; quantity: number }[]) => void;
     getProductById: (id: string) => Product | undefined;
     filteredProducts: Product[];
 }
@@ -21,9 +22,14 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const [products, setProducts] = useState<Product[]>([]);
     const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
 
+    // Increment this version when seed data changes structure to force a reload from JSON
+    const DATA_VERSION = '1.1';
+
     useEffect(() => {
         const storedProducts = localStorage.getItem('products');
-        if (storedProducts) {
+        const storedVersion = localStorage.getItem('data_version');
+
+        if (storedProducts && storedVersion === DATA_VERSION) {
             try {
                 const parsed = JSON.parse(storedProducts);
                 setProducts(parsed);
@@ -32,11 +38,16 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 console.error("Failed to parse stored products", e);
                 setProducts(initialProducts);
                 setFilteredProducts(initialProducts);
+                localStorage.setItem('products', JSON.stringify(initialProducts));
+                localStorage.setItem('data_version', DATA_VERSION);
             }
         } else {
+            // Force reload if version mismatch or no data
+            console.log("Data version mismatch or empty. Reloading from seed.");
             setProducts(initialProducts);
             setFilteredProducts(initialProducts);
             localStorage.setItem('products', JSON.stringify(initialProducts));
+            localStorage.setItem('data_version', DATA_VERSION);
         }
     }, []);
 
@@ -73,6 +84,17 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
         saveProducts(newProducts);
     };
 
+    const updateProductStock = (items: { id: string; quantity: number }[]) => {
+        const newProducts = products.map(p => {
+            const item = items.find(i => i.id === p.id);
+            if (item) {
+                return { ...p, stock: Math.max(0, p.stock - item.quantity) };
+            }
+            return p;
+        });
+        saveProducts(newProducts);
+    };
+
     return (
         <ProductContext.Provider value={{
             products,
@@ -81,7 +103,8 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
             getProductById,
             addProduct,
             updateProduct,
-            deleteProduct
+            deleteProduct,
+            updateProductStock
         }}>
             {children}
         </ProductContext.Provider>

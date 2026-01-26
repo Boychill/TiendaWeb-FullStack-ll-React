@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useProducts } from '../../context/ProductContext';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/Button';
@@ -8,6 +9,7 @@ import { CheckCircle, CreditCard, MapPin, Truck } from 'lucide-react';
 
 export function CheckoutPage() {
     const { cart, total, subtotal, shippingCost, clearCart } = useCart();
+    const { updateProductStock } = useProducts();
     const { user } = useAuth();
     const navigate = useNavigate();
 
@@ -47,6 +49,9 @@ export function CheckoutPage() {
 
         const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
         localStorage.setItem('orders', JSON.stringify([...existingOrders, newOrder]));
+
+        // Deduct stock
+        updateProductStock(cart.map(item => ({ id: item.id, quantity: item.quantity })));
 
         clearCart();
         // Show success state

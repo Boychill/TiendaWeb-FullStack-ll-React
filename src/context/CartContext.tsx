@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { CartItem, Product } from '../types/product';
+import { CartItem, Product } from '../types';
 
 interface CartContextType {
     cart: CartItem[];
-    addToCart: (product: Product, quantity: number, options?: { size?: string; color?: string }) => void;
+    addToCart: (product: Product, quantity: number, options?: Record<string, string>) => boolean;
     removeFromCart: (productId: string, options?: { size?: string; color?: string }) => void;
     clearCart: () => void;
     total: number;
@@ -28,13 +28,54 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('cart', JSON.stringify(cart));
     }, [cart]);
 
-    const addToCart = (product: Product, quantity: number, options?: { size?: string; color?: string }) => {
+    const addToCart = (product: Product, quantity: number, options?: Record<string, string>): boolean => {
+        const existingItem = cart.find(item => {
+            if (item.id !== product.id) return false;
+            // Compare variants
+            const itemVariants = item.variants || {};
+            const newVariants = options || {};
+
+            // Check keys length
+            const itemKeys = Object.keys(itemVariants);
+            const newKeys = Object.keys(newVariants);
+            if (itemKeys.length !== newKeys.length) return false;
+
+            // Check every key
+            return newKeys.every(key => itemVariants[key] === newVariants[key]);
+        });
+
+        const currentQty = existingItem ? existingItem.quantity : 0;
+
+        let maxStock = product.stock;
+
+        if (product.combinations && product.combinations.length > 0) {
+            maxStock = 0;
+
+            if (options) {
+                const variant = product.combinations.find(c =>
+                    Object.entries(c.values).every(([k, v]) => options[k] === v)
+                );
+
+                if (variant) {
+                    maxStock = variant.stock;
+                }
+            }
+        }
+
+        if (currentQty + quantity > maxStock) {
+            return false;
+        }
+
         setCart(prev => {
-            const existingItemIndex = prev.findIndex(item =>
-                item.id === product.id &&
-                item.variants?.size === options?.size &&
-                item.variants?.color === options?.color
-            );
+            const existingItemIndex = prev.findIndex(item => {
+                if (item.id !== product.id) return false;
+                const itemVariants = item.variants || {};
+                const newVariants = options || {};
+                const itemKeys = Object.keys(itemVariants);
+                const newKeys = Object.keys(newVariants);
+                if (itemKeys.length !== newKeys.length) return false;
+                return newKeys.every(key => itemVariants[key] === newVariants[key]);
+            });
 
             if (existingItemIndex > -1) {
                 const newCart = [...prev];
@@ -45,22 +86,31 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return [...prev, {
                 ...product,
                 quantity,
-                // Override variants with selected options if any, or keep default
-                variants: {
-                    ...product.variants,
-                    ...(options?.size ? { size: options.size } : {}),
-                    ...(options?.color ? { color: options.color } : {})
-                }
+                variants: options
             }];
         });
+
+        return true;
     };
 
-    const removeFromCart = (productId: string, options?: { size?: string; color?: string }) => {
-        setCart(prev => prev.filter(item => !(
-            item.id === productId &&
-            (options?.size ? item.variants?.size === options.size : true) &&
-            (options?.color ? item.variants?.color === options.color : true)
-        )));
+    const removeFromCart = (productId: string, options?: Record<string, string>) => {
+        setCart(prev => prev.filter(item => {
+            if (item.id !== productId) return true;
+            // If it is the product, check if variants match. If they match, remove (return false).
+            const itemVariants = item.variants || {};
+            const targetVariants = options || {};
+            const keys = Object.keys(targetVariants);
+
+            // If we are removing specific options
+            if (keys.length > 0) {
+                const match = keys.every(key => itemVariants[key] === targetVariants[key]);
+                return !match;
+            }
+            // If options is empty/undefined, remove all instances of product? or logic is flawed?
+            // Usually remove is called on a specific item in the cart list, so we might want to just filter by index or exact match.
+            // But let's keep the logic consistent: remove matching variant.
+            return true;
+        }));
     };
 
     const clearCart = () => setCart([]);

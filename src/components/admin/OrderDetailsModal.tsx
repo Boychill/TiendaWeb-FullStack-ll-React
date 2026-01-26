@@ -104,25 +104,20 @@ export function OrderDetailsModal({ order, isOpen, onClose, onStatusChange }: Or
                             {order.items.map((item, index) => (
                                 <div key={index} className="flex gap-4 items-center">
                                     <div className="w-16 h-16 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0 border border-gray-200">
-                                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                        <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover" />
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <h4 className="font-medium text-gray-900 truncate">{item.name}</h4>
                                         <p className="text-sm text-gray-500">
                                             {item.quantity} x ${item.price.toLocaleString('es-CL')}
                                         </p>
-                                        {(item.selectedColor || item.selectedSize) && (
-                                            <div className="flex gap-2 mt-1">
-                                                {item.selectedColor && (
-                                                    <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">
-                                                        {item.selectedColor}
+                                        {item.variants && Object.keys(item.variants).length > 0 && (
+                                            <div className="flex flex-wrap gap-2 mt-1">
+                                                {Object.entries(item.variants).map(([key, value]) => (
+                                                    <span key={key} className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded capitalize">
+                                                        {key}: {value}
                                                     </span>
-                                                )}
-                                                {item.selectedSize && (
-                                                    <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">
-                                                        {item.selectedSize}
-                                                    </span>
-                                                )}
+                                                ))}
                                             </div>
                                         )}
                                     </div>

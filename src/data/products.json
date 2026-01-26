@@ -7,14 +7,57 @@
         "description": "High-end smartphone with advanced camera and fast processor.",
         "category": "technology",
         "images": [
-            "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&q=80&w=600"
+            "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&q=80&w=600",
+            "https://images.unsplash.com/photo-1616348436168-de43ad0db179?auto=format&fit=crop&q=80&w=600",
+            "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&q=80&w=600"
         ],
-        "stock": 50,
+        "stock": 105,
+        "rating": 4.8,
+        "reviews": 120,
         "featured": true,
-        "variants": {
-            "color": "Black",
-            "storage": "256GB"
-        }
+        "attributes": [
+            {
+                "name": "color",
+                "options": [
+                    "Black",
+                    "Silver",
+                    "Gold"
+                ]
+            },
+            {
+                "name": "storage",
+                "options": [
+                    "256GB",
+                    "512GB"
+                ]
+            }
+        ],
+        "combinations": [
+            {
+                "id": "1-black-256",
+                "values": {
+                    "color": "Black",
+                    "storage": "256GB"
+                },
+                "stock": 50
+            },
+            {
+                "id": "1-silver-256",
+                "values": {
+                    "color": "Silver",
+                    "storage": "256GB"
+                },
+                "stock": 45
+            },
+            {
+                "id": "1-gold-512",
+                "values": {
+                    "color": "Gold",
+                    "storage": "512GB"
+                },
+                "stock": 10
+            }
+        ]
     },
     {
         "id": "2",
@@ -27,11 +70,33 @@
             "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&q=80&w=600"
         ],
         "stock": 20,
+        "rating": 4.5,
+        "reviews": 45,
         "featured": true,
-        "variants": {
-            "color": "Silver",
-            "ram": "16GB"
-        }
+        "attributes": [
+            {
+                "name": "color",
+                "options": [
+                    "Silver"
+                ]
+            },
+            {
+                "name": "ram",
+                "options": [
+                    "16GB"
+                ]
+            }
+        ],
+        "combinations": [
+            {
+                "id": "2-std",
+                "values": {
+                    "color": "Silver",
+                    "ram": "16GB"
+                },
+                "stock": 20
+            }
+        ]
     },
     {
         "id": "3",
@@ -44,9 +109,26 @@
             "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=600"
         ],
         "stock": 100,
-        "variants": {
-            "color": "Black"
-        }
+        "rating": 4.2,
+        "reviews": 89,
+        "featured": false,
+        "attributes": [
+            {
+                "name": "color",
+                "options": [
+                    "Black"
+                ]
+            }
+        ],
+        "combinations": [
+            {
+                "id": "3-blk",
+                "values": {
+                    "color": "Black"
+                },
+                "stock": 100
+            }
+        ]
     },
     {
         "id": "4",
@@ -56,13 +138,47 @@
         "description": "Premium cotton t-shirt, comfortable and breathable.",
         "category": "clothing",
         "images": [
-            "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=600"
+            "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=600",
+            "https://images.unsplash.com/photo-1581655353564-df123a1eb820?auto=format&fit=crop&q=80&w=600"
         ],
-        "stock": 200,
-        "variants": {
-            "color": "White",
-            "size": "L"
-        }
+        "stock": 350,
+        "rating": 4.0,
+        "reviews": 200,
+        "featured": false,
+        "attributes": [
+            {
+                "name": "color",
+                "options": [
+                    "White",
+                    "Black"
+                ]
+            },
+            {
+                "name": "size",
+                "options": [
+                    "M",
+                    "L"
+                ]
+            }
+        ],
+        "combinations": [
+            {
+                "id": "4-white-l",
+                "values": {
+                    "color": "White",
+                    "size": "L"
+                },
+                "stock": 200
+            },
+            {
+                "id": "4-black-m",
+                "values": {
+                    "color": "Black",
+                    "size": "M"
+                },
+                "stock": 150
+            }
+        ]
     },
     {
         "id": "5",
@@ -75,51 +191,25 @@
             "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&q=80&w=600"
         ],
         "stock": 80,
+        "rating": 4.6,
+        "reviews": 32,
         "featured": true,
-        "variants": {
-            "size": "M"
-        }
-    },
-    {
-        "id": "6",
-        "name": "Professional Drill Set",
-        "slug": "professional-drill-set",
-        "price": 89000,
-        "description": "Complete drill set with various bits and accessories.",
-        "category": "tools",
-        "images": [
-            "https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&q=80&w=600"
+        "attributes": [
+            {
+                "name": "size",
+                "options": [
+                    "M"
+                ]
+            }
         ],
-        "stock": 30,
-        "variants": {
-            "power": "18V"
-        }
-    },
-    {
-        "id": "7",
-        "name": "Garden Shovel",
-        "slug": "garden-shovel",
-        "price": 12000,
-        "description": "Durable shovel for all your gardening needs.",
-        "category": "tools",
-        "images": [
-            "https://images.unsplash.com/photo-1416879115533-1963fa81d773?auto=format&fit=crop&q=80&w=600"
-        ],
-        "stock": 150
-    },
-    {
-        "id": "8",
-        "name": "Mechanical Gaming Keyboard",
-        "slug": "mechanical-gaming-keyboard",
-        "price": 85000,
-        "description": "RGB mechanical keyboard with blue switches.",
-        "category": "technology",
-        "images": [
-            "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&q=80&w=600"
-        ],
-        "stock": 60,
-        "variants": {
-            "switch": "Blue"
-        }
+        "combinations": [
+            {
+                "id": "5-m",
+                "values": {
+                    "size": "M"
+                },
+                "stock": 80
+            }
+        ]
     }
 ]

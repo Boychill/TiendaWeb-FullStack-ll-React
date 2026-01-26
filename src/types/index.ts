@@ -1,10 +1,10 @@
 export interface Product {
-    id: number;
+    id: string;
     name: string;
     description: string;
     price: number;
     category: 'clothing' | 'technology';
-    image: string;
+    images: string[];
     // Ropa specific
     sizes?: string[];
     colors?: string[];
@@ -19,6 +19,17 @@ export interface Product {
     stock: number;
     rating: number;
     reviews: number;
+    attributes?: {
+        name: string;
+        options: string[];
+    }[];
+    combinations?: ProductVariant[];
+}
+
+export interface ProductVariant {
+    id: string;
+    values: Record<string, string>;
+    stock: number;
 }
 
 export interface User {
@@ -39,8 +50,7 @@ export interface Address {
 
 export interface CartItem extends Product {
     quantity: number;
-    selectedColor?: string;
-    selectedSize?: string;
+    variants?: Record<string, string>;
 }
 
 export interface Order {

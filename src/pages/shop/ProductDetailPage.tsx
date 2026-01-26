@@ -9,7 +9,7 @@ import { ArrowLeft, Minus, Plus, ShoppingCart, Truck, ShieldCheck } from 'lucide
 export function ProductDetailPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { getProductById } = useProducts();
+    const { getProductById, products } = useProducts();
     const { addToCart } = useCart();
 
     // Check if ID is defined before using it
@@ -18,23 +18,23 @@ export function ProductDetailPage() {
 
     const [selectedImage, setSelectedImage] = useState<string>('');
     const [quantity, setQuantity] = useState(1);
-    const [selectedOptions, setSelectedOptions] = useState<{ size?: string; color?: string }>({});
+    const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
 
     useEffect(() => {
         if (product) {
             setSelectedImage(product.images[0]);
-            // Initialize variants selection if applicable
-            if (product.variants) {
-                const initialOpts: any = {};
-                if (product.variants.color) initialOpts.color = product.variants.color; // Simplified: assumes single option for now or map
-                // Actually our variants structure in Product type is simple key-value for ONE variant
-                // If we want multiple choices we need a different structure. 
-                // The prompt/plan said 'variants (metadata like { color: "Red", size: "M" })'.
-                // If it represents AVAILABLE options, it should be arrays. 
-                // But the current JSON has single values, implying each ID is a specific variant or it's just metadata.
-                // For MVP, lets assume these are the Defaults/Only options for this specific SKU.
-                setSelectedOptions(product.variants);
-            }
+        }
+    }, [product]);
+
+    useEffect(() => {
+        if (product && product.attributes) {
+            const defaults: Record<string, string> = {};
+            product.attributes.forEach(attr => {
+                if (attr.options.length > 0) {
+                    defaults[attr.name] = attr.options[0];
+                }
+            });
+            setSelectedOptions(defaults);
         }
     }, [product]);
 
@@ -48,8 +48,10 @@ export function ProductDetailPage() {
     }
 
     const handleAddToCart = () => {
-        addToCart(product, quantity, selectedOptions);
-        // Maybe show toast
+        const success = addToCart(product, quantity, selectedOptions);
+        if (!success) {
+            alert(`No puedes agregar más productos. El stock máximo disponible es ${product.stock} y ya tienes unidades en el carro.`);
+        }
     };
 
     return (
@@ -104,38 +106,156 @@ export function ProductDetailPage() {
                         ${product.price.toLocaleString('es-CL')}
                     </div>
 
-                    <div className="h-px bg-gray-100" />
+                    {/* Variant Selectors */}
+                    {/* Dynamic Attributes */}
+                    {product.attributes?.map((attr: { name: string; options: string[] }) => (
+                        <div key={attr.name}>
+                            <h3 className="text-sm font-medium text-gray-900 mb-2">{attr.name}</h3>
+                            <div className="flex flex-wrap gap-2">
+                                {attr.options.map((option: string) => {
+                                    // Check if this option should be disabled based on *other* current selections
+                                    let isOptionDisabled = false;
+
+                                    if (product.combinations && product.combinations.length > 0) {
+                                        // Construct a hypothetical selection where this attribute is set to this option
+                                        // We keep other currently selected attributes
+                                        const hypotheticSelection = { ...selectedOptions, [attr.name]: option };
+
+                                        // We need to check if this specific option, combined with the OTHER currently selected options,
+                                        // results in a valid combination with stock > 0.
+
+                                        // 1. Filter out the current attribute from consideration to see what else is selected
+                                        const otherAttributes = product.attributes?.filter(a => a.name !== attr.name) || [];
+
+                                        // 2. Check if all OTHER attributes have a selection. 
+                                        // If not all others are selected, we generally allow selecting this one (unless we want to do forward checking, 
+                                        // but usually we only block if we have a full "path" to a dead end. 
+                                        // However, strictly, we should check if *any* compatible combination exists).
+                                        // For now, let's block only if the *resulting* combination (assuming others are selected) is effectively 0 stock.
+
+                                        const areOthersSelected = otherAttributes.every(a => selectedOptions[a.name]);
+
+                                        if (areOthersSelected) {
+                                            // Exact match check
+                                            const match = product.combinations.find(c =>
+                                                Object.entries(hypotheticSelection).every(([k, v]) => c.values[k] === v)
+                                            );
+
+                                            // If found and stock is 0, disable.
+                                            // If not found (invalid combo), disable.
+                                            if (match) {
+                                                if (match.stock <= 0) isOptionDisabled = true;
+                                            } else {
+                                                // Combination does not exist
+                                                isOptionDisabled = true;
+                                            }
+                                        } else {
+                                            // Advanced: If I pick "Red", and "Size" is not selected yet.
+                                            // Does "Red" have ANY valid combinations with stock > 0?
+                                            // If all Red shirts are out of stock (regardless of size), we should disable Red.
+
+                                            const hasAnyStockWithThisOption = product.combinations.some(c =>
+                                                c.values[attr.name] === option && c.stock > 0
+                                            );
+
+                                            if (!hasAnyStockWithThisOption) {
+                                                isOptionDisabled = true;
+                                            }
+                                        }
+                                    }
+
+                                    return (
+                                        <button
+                                            key={option}
+                                            disabled={isOptionDisabled}
+                                            onClick={() => setSelectedOptions(prev => ({ ...prev, [attr.name]: option }))}
+                                            title={isOptionDisabled ? "Sin stock disponible" : ""}
+                                            className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all relative ${selectedOptions[attr.name] === option
+                                                ? 'border-gray-900 bg-gray-900 text-white'
+                                                : isOptionDisabled
+                                                    ? 'border-gray-100 text-gray-300 bg-gray-50 cursor-not-allowed decoration-slice'
+                                                    : 'border-gray-200 text-gray-600 hover:border-gray-900'
+                                                }`}
+                                        >
+                                            {option}
+                                            {isOptionDisabled && (
+                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                    <div className="w-full h-px bg-gray-400 rotate-12"></div>
+                                                </div>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    ))}
+
+                    < div className="h-px bg-gray-100" />
 
                     {/* Quantity & Actions */}
                     <div className="space-y-6">
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center border border-gray-200 rounded-xl">
-                                <button
-                                    className="p-3 hover:bg-gray-50 transition-colors disabled:opacity-50"
-                                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                                    disabled={quantity <= 1}
-                                >
-                                    <Minus size={18} />
-                                </button>
-                                <span className="w-12 text-center font-bold">{quantity}</span>
-                                <button
-                                    className="p-3 hover:bg-gray-50 transition-colors disabled:opacity-50"
-                                    onClick={() => setQuantity(q => q + 1)}
-                                    disabled={quantity >= product.stock}
-                                >
-                                    <Plus size={18} />
-                                </button>
-                            </div>
+                        {(() => {
+                            // Helper to find stock for current selection
+                            const isSelectionComplete = product.attributes?.every(attr => selectedOptions[attr.name]);
+                            let currentStock = product.stock;
+                            let variantFound = null;
 
-                            <Button
-                                size="lg"
-                                className="flex-1 text-lg h-14"
-                                onClick={handleAddToCart}
-                                disabled={product.stock === 0}
-                            >
-                                <ShoppingCart className="mr-2" /> Agregar al Carro
-                            </Button>
-                        </div>
+                            if (isSelectionComplete && product.combinations?.length) {
+                                variantFound = product.combinations.find(c =>
+                                    Object.entries(c.values).every(([k, v]) => selectedOptions[k] === v)
+                                );
+                                if (variantFound) currentStock = variantFound.stock;
+                            }
+
+                            const isOutOfStock = isSelectionComplete && currentStock === 0;
+
+                            return (
+                                <>
+                                    {isSelectionComplete && variantFound && (
+                                        <div className="text-sm font-medium text-gray-500 mb-2">
+                                            Stock disponible: <span className="text-gray-900">{currentStock}</span>
+                                        </div>
+                                    )}
+
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center border border-gray-200 rounded-xl">
+                                            <button
+                                                className="p-3 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                                                onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                                                disabled={quantity <= 1 || isOutOfStock}
+                                            >
+                                                <Minus size={18} />
+                                            </button>
+                                            <span className="w-12 text-center font-bold">{isOutOfStock ? 0 : quantity}</span>
+                                            <button
+                                                className="p-3 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                                                onClick={() => setQuantity(q => q + 1)}
+                                                disabled={quantity >= currentStock || isOutOfStock}
+                                            >
+                                                <Plus size={18} />
+                                            </button>
+                                        </div>
+
+                                        <Button
+                                            size="lg"
+                                            className="flex-1 text-lg h-14"
+                                            onClick={() => {
+                                                if (currentStock < quantity) {
+                                                    alert("No hay suficiente stock para esta variante.");
+                                                    return;
+                                                }
+                                                handleAddToCart();
+                                            }}
+                                            disabled={!isSelectionComplete || isOutOfStock}
+                                            variant={isOutOfStock ? "secondary" : "default"}
+                                        >
+                                            <ShoppingCart className="mr-2" />
+                                            {!isSelectionComplete ? 'Selecciona Opciones' : isOutOfStock ? 'Agotado' : 'Agregar al Carro'}
+                                        </Button>
+                                    </div>
+                                </>
+                            );
+                        })()}
                     </div>
 
                     {/* Features / Trust */}
